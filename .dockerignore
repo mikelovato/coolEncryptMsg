@@ -1,0 +1,13 @@
+.awcache
+.dockerignore
+.git
+.gitignore
+.vscode
+bin
+data*
+dist
+docker
+Dockerfile
+docs
+*.yml
+*.md
