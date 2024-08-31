@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>View Messages</title>
+</head>
+
+<body>
+    <h1>Messages</h1>
+    <ul>
+        {% for msg in messages %}
+        <li>{{ msg.encryption_method }}: {{ msg.content }}</li>
+        {% endfor %}
+    </ul>
+</body>
+
+</html>
