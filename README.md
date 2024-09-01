@@ -4,8 +4,8 @@
 
 ```sh
 
-docker build -t cool-encrypt-msg .
-docker run -d -p 8080:8080 --name cool-msg-container cool-encrypt-msg
+docker build -t cool-encrypt-msg:1.0 .
+docker run -d -p 8080:8080 --name cool-msg-container cool-encrypt-msg:1.0
 ```
 
 ### Open web broswer

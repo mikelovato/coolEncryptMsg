@@ -1,22 +1,23 @@
 # Use the official Ubuntu base image
-FROM ubuntu:latest
+FROM ubuntu:20.04
 
 # Set the environment variable to prevent interactive prompts during package installation
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PYTHONUNBUFFERED 1
-# Update the package list and install necessary packages
-RUN apt-get update && apt-get install -y \
-    python3-pip \
-    python3-dev \
-    git \
-    && apt-get clean
 
 # Set the working directory to the Redis source directory
 WORKDIR /usr/local/src/coolencryptmsg
 
 COPY . /usr/local/src/coolencryptmsg
 # Clone the Redis source code from GitHub
-RUN pip3 install -r requirements.txt \
+
+
+RUN apt-get update && apt-get install -y \
+    python3-pip \
+    python3-dev \
+    git \
+    && apt-get clean \
+    && pip3 install -r requirements.txt \
     && python3 manage.py migrate
 # Expose port 8080
 EXPOSE 8080
