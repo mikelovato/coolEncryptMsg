@@ -37,4 +37,5 @@ def decrypt_message(method, encrypted_message):
         # Implement the corresponding decryption here if needed
         return fernet.decrypt(encrypted_message.encode()).decode()
     else:
-        raise ValueError("Unsupported decryption method")
+        return 'Unsupportmessage'
+        # raise ValueError("Unsupported decryption method")
