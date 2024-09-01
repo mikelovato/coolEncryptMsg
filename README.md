@@ -1,9 +1,8 @@
 # coolEncryptMsg
 
-### How to run?
+### How to run
 
 ```sh
-
 docker build -t cool-encrypt-msg:1.0 .
 docker run -d -p 8080:8080 --name cool-msg-container cool-encrypt-msg:1.0
 ```
