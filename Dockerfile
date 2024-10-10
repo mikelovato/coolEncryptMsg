@@ -16,6 +16,7 @@ RUN apt-get update && apt-get install -y \
     python3-pip \
     python3-dev \
     git \
+    sqlite3 \
     && apt-get clean \
     && pip3 install -r requirements.txt \
     && python3 manage.py migrate
