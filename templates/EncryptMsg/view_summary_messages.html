@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Plain Text and Ciphertext Messages</title>
+    <title>Plain Text, Ciphertext Messages and Algorithm </title>
     <style>
         table {
             width: 100%;
@@ -29,6 +29,7 @@
             <tr>
                 <th>Plain Text (Input)</th>
                 <th>Ciphertext (Output)</th>
+                <th>Encryption Type</th> <!-- New column header -->
             </tr>
         </thead>
         <tbody>
@@ -36,6 +37,7 @@
             <tr>
                 <td>{{ msg.content }}</td>
                 <td>{{ msg.encrypted_content }}</td>
+                <td>{{ msg.encryption_method }}</td> <!-- New column for encryption type -->
             </tr>
             {% endfor %}
         </tbody>
