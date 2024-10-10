@@ -41,4 +41,4 @@ def view_summary_messages(request):
         }
         for msg in messages
     ]
-    return render(request, 'Encryptmsg/view_summary_messages.html', {'messages': summary_messages})
+    return render(request, 'EncryptMsg/view_summary_messages.html', {'messages': summary_messages})
