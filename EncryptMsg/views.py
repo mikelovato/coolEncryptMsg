@@ -31,13 +31,14 @@ def view_messages(request):
     ]
     return render(request, 'EncryptMsg/view_massages.html', {'messages': decrypted_messages})
 
-def view_summary_messages(request):
+ef view_summary_messages(request):
     messages = Message.objects.all()
     summary_messages = [
         {
-            'content': msg.content,            # The original content (plaintext)
+            'content': msg.content,             # The original content (plaintext)
             'encrypted_content': msg.encrypted_content,  # The encrypted content (ciphertext)
+            'encryption_method': msg.encryption_method  # The encryption method (e.g., 'fernet', 'symmetric')
         }
         for msg in messages
     ]
-    return render(request, 'EncryptMsg/view_summary_messages.html', {'messages': summary_messages})
+    return render(request, 'encryptmsg/view_summary_messages.html', {'messages': summary_messages})
