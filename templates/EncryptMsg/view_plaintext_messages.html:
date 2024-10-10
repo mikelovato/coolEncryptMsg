@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plain Text and Ciphertext Messages</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+    </style>
+</head>
+<body>
+    <h1>Plain Text and Ciphertext Messages</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Plain Text (Input)</th>
+                <th>Ciphertext (Output)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for msg in messages %}
+            <tr>
+                <td>{{ msg.content }}</td>
+                <td>{{ msg.encrypted_content }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="{% url 'view_messages' %}">View Encrypted Messages</a>
+    <a href="{% url 'send_message' %}">Send a New Message</a>
+</body>
+</html>
