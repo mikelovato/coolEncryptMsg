@@ -30,3 +30,14 @@ def view_messages(request):
         for msg in messages
     ]
     return render(request, 'EncryptMsg/view_massages.html', {'messages': decrypted_messages})
+
+def view_summary_messages(request):
+    messages = Message.objects.all()
+    plaintext_messages = [
+        {
+            'content': msg.content,            # The original content (plaintext)
+            'encrypted_content': msg.encrypted_content,  # The encrypted content (ciphertext)
+        }
+        for msg in messages
+    ]
+    return render(request, 'EncryptMsg/view_plaintext_messages.html', {'messages': plaintext_messages})
