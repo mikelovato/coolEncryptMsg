@@ -31,7 +31,7 @@ def encrypt_message(method, message):
     if method == 'fernet':
         return fernet.encrypt(message.encode()).decode()
     
-    elif method == 'symmetric':
+    elif method == 'aes_cfb':
         # AES encryption using CFB mode
         salt = os.urandom(16)  # Generate a random salt for each encryption
         key = generate_key(password, salt)  # Generate a key using the random salt
@@ -52,7 +52,7 @@ def decrypt_message(method, encrypted_message):
     if method == 'fernet':
         return fernet.decrypt(encrypted_message.encode()).decode()
     
-    elif method == 'symmetric':
+    elif method == 'aes_cfb':
         # Split the salt, IV, and ciphertext from the encrypted message
         salt_b64, iv_b64, ciphertext_b64 = encrypted_message.split(':')
         salt = base64.urlsafe_b64decode(salt_b64)
