@@ -66,18 +66,58 @@ def rsa_decrypt(private_key, encrypted_message):
     )
     return plaintext.decode()
 
+def fernet_encrypt(message):
+    key = Fernet.generate_key()
+    fernet = Fernet(key)
+    encrypted_message = fernet.encrypt(message.encode())
+    return base64.urlsafe_b64encode(key).decode() + ':' + encrypted_message.decode()
+
+def fernet_decrypt(encrypted_message):
+    key_b64, encrypted_message_b64 = encrypted_message.split(':')
+    key = base64.urlsafe_b64decode(key_b64)
+    fernet = Fernet(key)
+    return fernet.decrypt(encrypted_message_b64.encode()).decode()
+
+def aes_encrypt(message, key):
+    iv = os.urandom(16)
+    cipher = Cipher(algorithms.AES(key), modes.CFB(iv), backend=default_backend())
+    encryptor = cipher.encryptor()
+    ciphertext = encryptor.update(message.encode()) + encryptor.finalize()
+    return base64.urlsafe_b64encode(iv).decode() + ':' + base64.urlsafe_b64encode(ciphertext).decode()
+
+def aes_decrypt(encrypted_message, key):
+    iv_b64, ciphertext_b64 = encrypted_message.split(':')
+    iv = base64.urlsafe_b64decode(iv_b64)
+    ciphertext = base64.urlsafe_b64decode(ciphertext_b64)
+    cipher = Cipher(algorithms.AES(key), modes.CFB(iv), backend=default_backend())
+    decryptor = cipher.decryptor()
+    return (decryptor.update(ciphertext) + decryptor.finalize()).decode()
+
+def chacha20_encrypt(message, key):
+    cipher = ChaCha20Poly1305(key)
+    nonce = os.urandom(12)
+    ciphertext = cipher.encrypt(nonce, message.encode(), None)
+    return base64.urlsafe_b64encode(nonce).decode() + ':' + base64.urlsafe_b64encode(ciphertext).decode()
+
+def chacha20_decrypt(encrypted_message, key):
+    nonce_b64, ciphertext_b64 = encrypted_message.split(':')
+    nonce = base64.urlsafe_b64decode(nonce_b64)
+    ciphertext = base64.urlsafe_b64decode(ciphertext_b64)
+    cipher = ChaCha20Poly1305(key)
+    return cipher.decrypt(nonce, ciphertext, None).decode()
+
 def encrypt_message(method, message):
     if method == 'fernet':
-        # Fernet encryption code...
-        # (existing code unchanged)
+        return fernet_encrypt(message)
     
     elif method == 'aes_cfb':
-        # AES encryption code...
-        # (existing code unchanged)
+        salt = os.urandom(16)
+        key = generate_key(password, salt)  # Generate key using PBKDF2HMAC
+        return aes_encrypt(message, key)
 
     elif method == 'chacha20_poly1305':
-        # ChaCha20-Poly1305 encryption code...
-        # (existing code unchanged)
+        key = os.urandom(32)  # Generate a new key for ChaCha20
+        return chacha20_encrypt(message, key)
 
     elif method == 'rsa':
         private_key, public_key = generate_rsa_keys()  # Generate RSA keys
@@ -92,16 +132,16 @@ def encrypt_message(method, message):
 
 def decrypt_message(method, encrypted_message):
     if method == 'fernet':
-        # Fernet decryption code...
-        # (existing code unchanged)
+        return fernet_decrypt(encrypted_message)
     
     elif method == 'aes_cfb':
-        # AES decryption code...
-        # (existing code unchanged)
+        salt = os.urandom(16)  # Re-generate the salt (store this securely in practice)
+        key = generate_key(password, salt)
+        return aes_decrypt(encrypted_message, key)
 
     elif method == 'chacha20_poly1305':
-        # ChaCha20-Poly1305 decryption code...
-        # (existing code unchanged)
+        key = os.urandom(32)  # In practice, you need to securely store and retrieve this key
+        return chacha20_decrypt(encrypted_message, key)
 
     elif method == 'rsa':
         private_key_b64, encrypted_message_b64 = encrypted_message.split(':')
