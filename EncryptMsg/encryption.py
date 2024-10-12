@@ -14,17 +14,17 @@ password = b"passwordexample"
 def generate_key(password, salt):
     kdf = PBKDF2HMAC(
         algorithm=hashes.SHA256(),
-        length=32,
+        length=32,  # 32 bytes for AES-256
         salt=salt,
         iterations=480000,
     )
-    return base64.urlsafe_b64encode(kdf.derive(password))
+    return kdf.derive(password)  # Return raw key bytes for AES
 
 # Use a static salt for Fernet (can be changed if needed)
 salt = bytes(b'0')
 
 # Key generation for Fernet
-settings.FERNET_KEY = generate_key(password, salt)
+settings.FERNET_KEY = base64.urlsafe_b64encode(generate_key(password, salt)).decode()  # Base64-encode for Fernet
 fernet = Fernet(settings.FERNET_KEY)
 
 def encrypt_message(method, message):
@@ -43,7 +43,11 @@ def encrypt_message(method, message):
         encrypted_message = encryptor.update(message.encode()) + encryptor.finalize()
         
         # Return salt, IV, and encrypted message (concatenated with ':')
-        return base64.urlsafe_b64encode(salt).decode() + ':' + base64.urlsafe_b64encode(iv).decode() + ':' + base64.urlsafe_b64encode(encrypted_message).decode()
+        return (
+            base64.urlsafe_b64encode(salt).decode() + ':' +
+            base64.urlsafe_b64encode(iv).decode() + ':' +
+            base64.urlsafe_b64encode(encrypted_message).decode()
+        )
     
     else:
         raise ValueError("Unsupported encryption method")
