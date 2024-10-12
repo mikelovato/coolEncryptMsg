@@ -153,4 +153,4 @@ def decrypt_message(method, encrypted_message):
         return rsa_decrypt(private_key, encrypted_message)
 
     else:
-        return 'Unsupported encryption method'
+        raise ValueError("Unsupported encryption method")
