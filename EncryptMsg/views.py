@@ -3,6 +3,7 @@ from django.shortcuts import render, redirect
 from .forms import MessageForm
 from .models import Message
 from .encryption import encrypt_message, decrypt_message
+from cryptography.hazmat.primitives.asymmetric import rsa
 
 def send_message(request):
     if request.method == 'POST':
@@ -10,7 +11,22 @@ def send_message(request):
         if form.is_valid():
             content = form.cleaned_data['content']
             method = form.cleaned_data['encryption_method']
-            encrypted_content = encrypt_message(method, content)
+
+            # If using RSA, generate a new key pair
+            if method == 'rsa':
+                private_key = rsa.generate_private_key(
+                    public_exponent=65537,
+                    key_size=2048,
+                )
+                # Store or use the private key securely as needed
+
+                # Extract the public key for encryption
+                public_key = private_key.public_key()
+                encrypted_content = encrypt_message(method, content, public_key)  # Pass the public key
+
+            else:
+                encrypted_content = encrypt_message(method, content)
+
             Message.objects.create(
                 content=content, 
                 encryption_method=method, 
