@@ -4,7 +4,6 @@ from .forms import MessageForm
 from .models import Message
 from .encryption import encrypt_message, decrypt_message
 
-
 def send_message(request):
     if request.method == 'POST':
         form = MessageForm(request.POST)
@@ -13,12 +12,12 @@ def send_message(request):
             method = form.cleaned_data['encryption_method']
             encrypted_content = encrypt_message(method, content)
             Message.objects.create(
-                content=content, encryption_method=method, encrypted_content=encrypted_content)
+                content=content, encryption_method=method, encrypted_content=encrypted_content
+            )
             return redirect('view_messages')
     else:
         form = MessageForm()
-    return render(request, 'EncryptMsg/send_massages.html', {'form': form})
-
+    return render(request, 'EncryptMsg/send_messages.html', {'form': form})  # Fixed typo in template name
 
 def view_messages(request):
     messages = Message.objects.all()
@@ -29,7 +28,7 @@ def view_messages(request):
         }
         for msg in messages
     ]
-    return render(request, 'EncryptMsg/view_massages.html', {'messages': decrypted_messages})
+    return render(request, 'EncryptMsg/view_messages.html', {'messages': decrypted_messages})  # Fixed typo in template name
 
 def view_summary_messages(request):
     messages = Message.objects.all()
@@ -37,7 +36,7 @@ def view_summary_messages(request):
         {
             'content': msg.content,             # The original content (plaintext)
             'encrypted_content': msg.encrypted_content,  # The encrypted content (ciphertext)
-            'encryption_method': msg.encryption_method  # The encryption method (e.g., 'fernet', 'symmetric')
+            'encryption_method': msg.encryption_method  # The encryption method (e.g., 'fernet', 'aes_cfb')
         }
         for msg in messages
     ]
