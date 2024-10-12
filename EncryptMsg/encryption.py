@@ -106,7 +106,7 @@ def chacha20_decrypt(encrypted_message, key):
     cipher = ChaCha20Poly1305(key)
     return cipher.decrypt(nonce, ciphertext, None).decode()
 
-def encrypt_message(method, message):
+def encrypt_message(method, message, public_key=None):
     if method == 'fernet':
         return fernet_encrypt(message)
     
@@ -120,8 +120,10 @@ def encrypt_message(method, message):
         return chacha20_encrypt(message, key)
 
     elif method == 'rsa':
-        private_key, public_key = generate_rsa_keys()  # Generate RSA keys
+        if public_key is None:
+            raise ValueError("Public key must be provided for RSA encryption")
         encrypted_message = rsa_encrypt(public_key, message)
+        private_key, _ = generate_rsa_keys()  # Generate RSA keys (private key only needed for serialization)
         return (
             base64.urlsafe_b64encode(serialize_private_key(private_key)).decode() + ':' +
             base64.urlsafe_b64encode(encrypted_message).decode()
