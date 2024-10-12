@@ -13,19 +13,19 @@ def send_message(request):
             method = form.cleaned_data['encryption_method']
 
             # If using RSA, generate a new key pair
+            private_key = None
+            public_key = None
+            
             if method == 'rsa':
                 private_key = rsa.generate_private_key(
                     public_exponent=65537,
                     key_size=2048,
                 )
-                # Store or use the private key securely as needed
-
                 # Extract the public key for encryption
                 public_key = private_key.public_key()
-                encrypted_content = encrypt_message(method, content, public_key)  # Pass the public key
 
-            else:
-                encrypted_content = encrypt_message(method, content)
+            # Pass the public key if method is RSA
+            encrypted_content = encrypt_message(method, content, public_key)
 
             Message.objects.create(
                 content=content, 
@@ -35,6 +35,7 @@ def send_message(request):
             return redirect('view_messages')
     else:
         form = MessageForm()
+    
     return render(request, 'EncryptMsg/send_messages.html', {'form': form})  
 
 def view_messages(request):
