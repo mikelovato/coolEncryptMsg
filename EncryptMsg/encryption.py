@@ -13,6 +13,12 @@ from cryptography.hazmat.primitives import serialization
 # Define the password that will be used for key derivation
 password = b"passwordexample"
 
+# Generate RSA keys once at the start
+private_key, public_key = rsa.generate_private_key(
+    public_exponent=65537,
+    key_size=2048,
+), None  # Set this later
+
 # Function to generate a key using PBKDF2HMAC
 def generate_key(password, salt):
     kdf = PBKDF2HMAC(
@@ -22,14 +28,6 @@ def generate_key(password, salt):
         iterations=480000,
     )
     return kdf.derive(password)  # Return raw key bytes for AES
-
-def generate_rsa_keys():
-    private_key = rsa.generate_private_key(
-        public_exponent=65537,
-        key_size=2048,
-    )
-    public_key = private_key.public_key()
-    return private_key, public_key
 
 def serialize_public_key(public_key):
     return public_key.public_bytes(
@@ -106,7 +104,7 @@ def chacha20_decrypt(encrypted_message, key):
     cipher = ChaCha20Poly1305(key)
     return cipher.decrypt(nonce, ciphertext, None).decode()
 
-def encrypt_message(method, message, public_key=None):
+def encrypt_message(method, message):
     if method == 'fernet':
         return fernet_encrypt(message)
     
@@ -120,10 +118,10 @@ def encrypt_message(method, message, public_key=None):
         return chacha20_encrypt(message, key)
 
     elif method == 'rsa':
+        global public_key  # Use the global public_key variable
         if public_key is None:
-            raise ValueError("Public key must be provided for RSA encryption")
+            public_key = private_key.public_key()  # Get the public key from the private key
         encrypted_message = rsa_encrypt(public_key, message)
-        private_key, _ = generate_rsa_keys()  # Generate RSA keys (private key only needed for serialization)
         return (
             base64.urlsafe_b64encode(serialize_private_key(private_key)).decode() + ':' +
             base64.urlsafe_b64encode(encrypted_message).decode()
