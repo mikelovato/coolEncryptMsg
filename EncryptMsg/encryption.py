@@ -5,7 +5,6 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 import base64
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-from cryptography.hazmat.backends import default_backend
 
 # Define the password that will be used for key derivation
 password = b"passwordexample"
@@ -29,7 +28,14 @@ fernet = Fernet(settings.FERNET_KEY)
 
 def encrypt_message(method, message):
     if method == 'fernet':
-        return fernet.encrypt(message.encode()).decode()
+        # Generate a random nonce
+        nonce = os.urandom(16)  # 16 bytes nonce
+        # Prepend nonce to the message
+        message_with_nonce = nonce + message.encode()
+        # Encrypt the message
+        encrypted_message = fernet.encrypt(message_with_nonce)
+        # Return the nonce and encrypted message
+        return base64.urlsafe_b64encode(nonce).decode() + ':' + encrypted_message.decode()
     
     elif method == 'aes_cfb':
         # AES encryption using CFB mode
@@ -54,8 +60,17 @@ def encrypt_message(method, message):
 
 def decrypt_message(method, encrypted_message):
     if method == 'fernet':
-        return fernet.decrypt(encrypted_message.encode()).decode()
-    
+        # Split the nonce and encrypted message
+        nonce_b64, encrypted_message_b64 = encrypted_message.split(':')
+        nonce = base64.urlsafe_b64decode(nonce_b64)
+        encrypted_message_bytes = encrypted_message_b64.encode()
+        
+        # Decrypt the message
+        decrypted_message_with_nonce = fernet.decrypt(encrypted_message_bytes)
+        
+        # Return the decrypted message (removing the nonce)
+        return decrypted_message_with_nonce[16:].decode()  # Remove the nonce
+        
     elif method == 'aes_cfb':
         # Split the salt, IV, and ciphertext from the encrypted message
         salt_b64, iv_b64, ciphertext_b64 = encrypted_message.split(':')
