@@ -17,7 +17,7 @@ def send_message(request):
             return redirect('view_messages')
     else:
         form = MessageForm()
-    return render(request, 'EncryptMsg/send_messages.html', {'form': form})  # Fixed typo in template name
+    return render(request, 'EncryptMsg/send_messages.html', {'form': form})  
 
 def view_messages(request):
     messages = Message.objects.all()
@@ -28,8 +28,7 @@ def view_messages(request):
         }
         for msg in messages
     ]
-    return render(request, 'EncryptMsg/view_messages.html', {'messages': decrypted_messages})  # Fixed typo in template name
-
+    return render(request, 'EncryptMsg/view_messages.html', {'messages': decrypted_messages})  
 def view_summary_messages(request):
     messages = Message.objects.all()
     summary_messages = [
