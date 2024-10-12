@@ -6,4 +6,5 @@ class MessageForm(forms.Form):
         ('fernet', 'Fernet'),
         ('aes_cfb', 'AES (CFB Mode)'),
         ('chacha20_poly1305', 'ChaCha20-Poly1305'),
+        ('rsa', 'RSA'), 
     ])
