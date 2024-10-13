@@ -2,9 +2,7 @@ from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from .forms import MessageForm
 from .models import Message
-from .encryption import encrypt_message, decrypt_message
-import hashlib  # For SHA-256 hashing
-import bcrypt  # For bcrypt hashing
+from .encryption import encrypt_message, decrypt_message, hash_sha256, hash_bcrypt  # Import hashing functions
 
 def send_message(request):
     if request.method == 'POST':
@@ -16,11 +14,9 @@ def send_message(request):
             # Encrypt the content
             encrypted_content = encrypt_message(method, content)
 
-            # Hash the content using SHA-256
-            hashed_content_sha256 = hashlib.sha256(content.encode()).hexdigest()
-
-            # Hash the content using bcrypt
-            hashed_content_bcrypt = bcrypt.hashpw(content.encode(), bcrypt.gensalt()).decode()
+            # Hash the content using SHA-256 and bcrypt
+            hashed_content_sha256 = hash_sha256(content)
+            hashed_content_bcrypt = hash_bcrypt(content)
 
             # Save the content, encryption method, encrypted content, hashed content (SHA-256), and hashed content (bcrypt) to the database
             Message.objects.create(
