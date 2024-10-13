@@ -29,7 +29,9 @@
             <tr>
                 <th>Plain Text (Input)</th>
                 <th>Ciphertext (Output)</th>
-                <th>Encryption Type</th> <!-- New column header -->
+                <th>Encryption Type</th> <!-- Existing column for encryption type -->
+                <th>SHA-256 Hash</th> <!-- New column for SHA-256 hash -->
+                <th>Bcrypt Hash</th> <!-- New column for Bcrypt hash -->
             </tr>
         </thead>
         <tbody>
@@ -37,7 +39,9 @@
             <tr>
                 <td>{{ msg.content }}</td>
                 <td>{{ msg.encrypted_content }}</td>
-                <td>{{ msg.encryption_method }}</td> <!-- New column for encryption type -->
+                <td>{{ msg.encryption_method }}</td> <!-- Existing column for encryption type -->
+                <td>{{ msg.hashed_content_sha256 }}</td> <!-- New column for SHA-256 hash -->
+                <td>{{ msg.hashed_content_bcrypt }}</td> <!-- New column for Bcrypt hash -->
             </tr>
             {% endfor %}
         </tbody>
