@@ -1,5 +1,6 @@
 import os
 import base64
+import bcrypt  # Import bcrypt for hashing
 from cryptography.fernet import Fernet
 from django.conf import settings
 from cryptography.hazmat.primitives import hashes
@@ -126,3 +127,17 @@ def decrypt_message(method, encrypted_message):
 
     else:
         return 'Unsupported encryption method'
+
+def hash_sha256(message):
+    """Hash a message using SHA-256."""
+    sha256 = hashes.Hash(hashes.SHA256(), backend=default_backend())
+    sha256.update(message.encode())
+    return base64.urlsafe_b64encode(sha256.finalize()).decode()
+
+def hash_bcrypt(message):
+    """Hash a message using bcrypt."""
+    # Generate a salt
+    salt = bcrypt.gensalt()
+    # Hash the message
+    hashed = bcrypt.hashpw(message.encode(), salt)
+    return hashed.decode()
