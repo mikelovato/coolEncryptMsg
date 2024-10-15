@@ -1,8 +1,8 @@
 import os
 import base64
 import bcrypt  # Import bcrypt for hashing
-from cryptography.fernet import Fernet
 from django.conf import settings
+from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
@@ -76,6 +76,50 @@ def encrypt_message(method, message):
             base64.urlsafe_b64encode(encrypted_message).decode()
         )
     
+    elif method == 'aes_ctr':
+        # AES encryption using CTR mode
+        salt = os.urandom(16)  # Generate a random salt for each encryption
+        key = generate_key(password, salt)  # Generate a key using the random salt
+        nonce = os.urandom(16)  # Generate a random 16-byte nonce
+        
+        # Create the cipher method for using AES in CTR mode
+        cipher = Cipher(algorithms.AES(key), modes.CTR(nonce), backend=default_backend())
+        encryptor = cipher.encryptor()
+
+        # Using cipher method to encrypt plaintext
+        encrypted_message = encryptor.update(message.encode()) + encryptor.finalize()
+        
+
+        # Return salt, nonce, and encrypted message of using aes CTR mode
+        return (
+            base64.urlsafe_b64encode(salt).decode() + ':' +
+            base64.urlsafe_b64encode(nonce).decode() + ':' +
+            base64.urlsafe_b64encode(encrypted_message).decode()
+        )
+
+    elif method == 'aes_gcm':
+        # AES encryption using GCM mode
+        salt = os.urandom(16)  # Generate a random salt for each encryption
+        key = generate_key(password, salt)  # Generate a key using the random salt
+        nonce = os.urandom(12)  # Generate a random 12-byte nonce
+        
+        # Create the cipher method for using AES in GCM mode
+        cipher = Cipher(algorithms.AES(key), modes.GCM(nonce), backend=default_backend())
+        encryptor = cipher.encryptor()
+
+        # Using cipher method to encrypt plaintext
+        encrypted_message = encryptor.update(message.encode()) + encryptor.finalize()
+        
+        # Getting the tag of the GCM mode for authentication and verification
+        tag = encryptor.tag
+
+        # Return salt, nonce, tag and encrypted message of using aes GCM mode
+        return (
+            base64.urlsafe_b64encode(salt).decode() + ':' +
+            base64.urlsafe_b64encode(nonce).decode() + ':' +
+            base64.urlsafe_b64encode(tag).decode() + ':' +
+            base64.urlsafe_b64encode(encrypted_message).decode()
+        )
     else:
         raise ValueError("Unsupported encryption method")
 
@@ -124,6 +168,41 @@ def decrypt_message(method, encrypted_message):
         decrypted_message = cipher.decrypt(nonce, ciphertext, None)
 
         return decrypted_message.decode()
+
+    elif method == 'aes_ctr':
+        # Split the salt, nonce, and ciphertext from the encrypted message
+        salt_b64, nonce_b64, ciphertext_b64 = encrypted_message.split(':')
+        salt = base64.urlsafe_b64decode(salt_b64)
+        nonce = base64.urlsafe_b64decode(nonce_b64)
+        ciphertext = base64.urlsafe_b64decode(ciphertext_b64)
+
+        # Generate the key using the same salt
+        key = generate_key(password, salt)
+
+        # Generate the decryptor for the message using AES in CTR mode
+        cipher = Cipher(algorithms.AES(key), modes.CTR(nonce), backend=default_backend())
+        decryptor = cipher.decryptor()
+
+        # Decrypt the ciphertext by using decryptor
+        return (decryptor.update(ciphertext) + decryptor.finalize()).decode()
+
+    elif method == 'aes_gcm':
+        # Split the salt, nonce, tag and ciphertext from the encrypted message
+        salt_b64, nonce_b64, tag_b64, ciphertext_b64 = encrypted_message.split(':')
+        salt = base64.urlsafe_b64decode(salt_b64)
+        nonce = base64.urlsafe_b64decode(nonce_b64)
+        tag = base64.urlsafe_b64decode(tag_b64)
+        ciphertext = base64.urlsafe_b64decode(ciphertext_b64)
+
+        # Generate the key using the same salt
+        key = generate_key(password, salt)
+
+        # Generate the decryptor for the message using AES in GCM mode
+        cipher = Cipher(algorithms.AES(key), modes.GCM(nonce, tag), backend=default_backend())
+        decryptor = cipher.decryptor()
+
+        # Decrypt the ciphertext by using decryptor
+        return (decryptor.update(ciphertext) + decryptor.finalize()).decode()
 
     else:
         return 'Unsupported encryption method'
