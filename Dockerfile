@@ -19,12 +19,11 @@ RUN apt-get update && apt-get install -y \
     git \
     sqlite3 \
     libssl-dev \
-    libffi-dev \
-    libsodium-dev \  # Required for cryptography/bcrypt
-    && apt-get clean
+    libffi-dev \         # Required for cryptography
+    libsodium-dev && apt-get clean
 
 # Install Python dependencies
-RUN pip3 install -r requirements.txt
+RUN pip3 install --no-cache-dir -r requirements.txt
 
 # Run migrations (important after installing requirements)
 RUN python3 manage.py migrate
