@@ -18,8 +18,18 @@ password = b"passwordexample"
 # Function to generate a key using PBKDF2HMAC
 def generate_key_128(password, salt):
     kdf = PBKDF2HMAC(
-        algorithm=hashes.SHA256(),  # SHA-256 is still appropriate
+        algorithm=hashes.SHA256(),  # Using SHA-256 for key derivation
         length=16,  # 16 bytes for a 128-bit key
+        salt=salt,
+        iterations=480000,
+        backend=default_backend(),
+    )
+    return kdf.derive(password)
+
+def generate_key_192(password, salt):
+    kdf = PBKDF2HMAC(
+        algorithm=hashes.SHA256(),  # Using SHA-256 for key derivation
+        length=24,  # 24 bytes for a 192-bit key
         salt=salt,
         iterations=480000,
         backend=default_backend(),
@@ -28,33 +38,14 @@ def generate_key_128(password, salt):
 
 def generate_key_256(password, salt):
     kdf = PBKDF2HMAC(
-        algorithm=hashes.SHA256(),
-        length=32,  # 32 bytes for AES-256
+        algorithm=hashes.SHA256(), # Using SHA-256 for key derivation
+        length=32,  # 32 bytes for a 256-bit key
         salt=salt,
         iterations=480000,
         backend=default_backend(),
     )
     return kdf.derive(password)
 
-def generate_key_384(password, salt):
-    kdf = PBKDF2HMAC(
-        algorithm=hashes.SHA384(),  # Use SHA-384 for a 384-bit key
-        length=48,  # 48 bytes for a 384-bit key
-        salt=salt,
-        iterations=480000,
-        backend=default_backend(),
-    )
-    return kdf.derive(password)
-
-def generate_key_512(password, salt):
-    kdf = PBKDF2HMAC(
-        algorithm=hashes.SHA512(),  # Use SHA-512 for a 512-bit key
-        length=64,  # 64 bytes for a 512-bit key
-        salt=salt,
-        iterations=480000,
-        backend=default_backend(),
-    )
-    return kdf.derive(password)
 
 def encrypt_message(method, message):
     start_time = time.perf_counter()  # Use high-resolution timer
@@ -137,22 +128,9 @@ def encrypt_message(method, message):
             base64.urlsafe_b64encode(encrypted_message).decode()
         )
 
-    elif method == 'aes_cfb_384':
+    elif method == 'aes_cfb_192':
         salt = os.urandom(16)
-        key = generate_key_384(password, salt)
-        iv = os.urandom(16)
-        cipher = Cipher(algorithms.AES(key), modes.CFB(iv), backend=default_backend())
-        encryptor = cipher.encryptor()
-        encrypted_message = encryptor.update(message.encode()) + encryptor.finalize()
-        encrypted_result = (
-            base64.urlsafe_b64encode(salt).decode() + ':' +
-            base64.urlsafe_b64encode(iv).decode() + ':' +
-            base64.urlsafe_b64encode(encrypted_message).decode()
-        )
-
-    elif method == 'aes_cfb_512':
-        salt = os.urandom(16)
-        key = generate_key_512(password, salt)
+        key = generate_key_192(password, salt)
         iv = os.urandom(16)
         cipher = Cipher(algorithms.AES(key), modes.CFB(iv), backend=default_backend())
         encryptor = cipher.encryptor()
@@ -176,22 +154,9 @@ def encrypt_message(method, message):
             base64.urlsafe_b64encode(encrypted_message).decode()
         )
 
-    elif method == 'aes_ctr_384':
+    elif method == 'aes_ctr_192':
         salt = os.urandom(16)
-        key = generate_key_384(password, salt)
-        nonce = os.urandom(16)
-        cipher = Cipher(algorithms.AES(key), modes.CTR(nonce), backend=default_backend())
-        encryptor = cipher.encryptor()
-        encrypted_message = encryptor.update(message.encode()) + encryptor.finalize()
-        encrypted_result = (
-            base64.urlsafe_b64encode(salt).decode() + ':' +
-            base64.urlsafe_b64encode(nonce).decode() + ':' +
-            base64.urlsafe_b64encode(encrypted_message).decode()
-        )
-
-    elif method == 'aes_ctr_512':
-        salt = os.urandom(16)
-        key = generate_key_512(password, salt)
+        key = generate_key_192(password, salt)
         nonce = os.urandom(16)
         cipher = Cipher(algorithms.AES(key), modes.CTR(nonce), backend=default_backend())
         encryptor = cipher.encryptor()
@@ -217,9 +182,9 @@ def encrypt_message(method, message):
             base64.urlsafe_b64encode(encrypted_message).decode()
         )
         
-    elif method == 'aes_gcm_384':
+    elif method == 'aes_gcm_192':
         salt = os.urandom(16)
-        key = generate_key_384(password, salt)
+        key = generate_key_192(password, salt)
         nonce = os.urandom(12)
         cipher = Cipher(algorithms.AES(key), modes.GCM(nonce), backend=default_backend())
         encryptor = cipher.encryptor()
@@ -231,22 +196,7 @@ def encrypt_message(method, message):
             base64.urlsafe_b64encode(tag).decode() + ':' +
             base64.urlsafe_b64encode(encrypted_message).decode()
         )
-
-    elif method == 'aes_gcm_512':
-        salt = os.urandom(16)
-        key = generate_key_512(password, salt)
-        nonce = os.urandom(12)
-        cipher = Cipher(algorithms.AES(key), modes.GCM(nonce), backend=default_backend())
-        encryptor = cipher.encryptor()
-        encrypted_message = encryptor.update(message.encode()) + encryptor.finalize()
-        tag = encryptor.tag
-        encrypted_result = (
-            base64.urlsafe_b64encode(salt).decode() + ':' +
-            base64.urlsafe_b64encode(nonce).decode() + ':' +
-            base64.urlsafe_b64encode(tag).decode() + ':' +
-            base64.urlsafe_b64encode(encrypted_message).decode()
-        )
-
+        
     else:
         raise ValueError("Unsupported encryption method")
 
