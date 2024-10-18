@@ -46,6 +46,7 @@ def send_message(request):
 
 def view_messages(request):
     messages = Message.objects.all()  # Retrieve all messages from the database
+    print(f"Retrieved messages: {messages}")  # Debugging output
     return render(request, 'EncryptMsg/view_messages.html', {'messages': messages})
 
 def view_summary_messages(request):
