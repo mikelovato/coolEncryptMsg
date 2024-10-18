@@ -11,7 +11,6 @@ from cryptography.hazmat.primitives.ciphers.aead import ChaCha20Poly1305
 from cryptography.hazmat.backends import default_backend
 from argon2 import PasswordHasher  # Import Argon2
 from cryptography.hazmat.primitives import hashes as hash_algorithms  # For SHA-3
-from cryptography.hazmat.primitives import hashes as hash_algorithms
 
 # Example password for key generation
 password = b"passwordexample"
