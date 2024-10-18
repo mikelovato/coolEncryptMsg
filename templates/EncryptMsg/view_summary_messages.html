@@ -32,9 +32,9 @@
                 <th>Encryption Type</th>
                 <th>SHA-256 Hash</th>
                 <th>Bcrypt Hash</th>
-                <th>Encryption Time (ms)</th> <!-- New column for encryption time -->
-                <th>SHA-256 Hash Time (ms)</th> <!-- New column for SHA-256 hash time -->
-                <th>Bcrypt Hash Time (ms)</th> <!-- New column for bcrypt hash time -->
+                <th>Encryption Time (ms)</th>
+                <th>SHA-256 Hash Time (ms)</th>
+                <th>Bcrypt Hash Time (ms)</th>
             </tr>
         </thead>
         <tbody>
@@ -45,9 +45,9 @@
                 <td>{{ msg.encryption_method }}</td>
                 <td>{{ msg.hashed_content_sha256 }}</td>
                 <td>{{ msg.hashed_content_bcrypt }}</td>
-                <td>{{ msg.encryption_time|floatformat:3 }}</td> <!-- Display encryption time in milliseconds -->
-                <td>{{ msg.sha256_hash_time|floatformat:3 }}</td> <!-- Display SHA-256 hash time in milliseconds -->
-                <td>{{ msg.bcrypt_hash_time|floatformat:3 }}</td> <!-- Display bcrypt hash time in milliseconds -->
+                <td>{{ msg.encryption_time|floatformat:3 }}</td> <!-- Display encryption time -->
+                <td>{{ msg.sha256_hash_time|floatformat:3 }}</td> <!-- Display SHA-256 hash time -->
+                <td>{{ msg.bcrypt_hash_time|floatformat:3 }}</td> <!-- Display bcrypt hash time -->
             </tr>
             {% endfor %}
         </tbody>
