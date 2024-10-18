@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Plain Text, Ciphertext Messages and Algorithm </title>
+    <title>Plain Text, Ciphertext Messages and Algorithm</title>
     <style>
         table {
             width: 100%;
@@ -23,15 +23,18 @@
     </style>
 </head>
 <body>
-    <h1>Plain Text and Ciphertext Messages</h1>
+    <h1>Plain Text, Ciphertext, and Timing Information</h1>
     <table>
         <thead>
             <tr>
                 <th>Plain Text (Input)</th>
                 <th>Ciphertext (Output)</th>
-                <th>Encryption Type</th> <!-- Existing column for encryption type -->
-                <th>SHA-256 Hash</th> <!-- New column for SHA-256 hash -->
-                <th>Bcrypt Hash</th> <!-- New column for Bcrypt hash -->
+                <th>Encryption Type</th>
+                <th>SHA-256 Hash</th>
+                <th>Bcrypt Hash</th>
+                <th>Encryption Time (ms)</th> <!-- New column for encryption time -->
+                <th>SHA-256 Hash Time (ms)</th> <!-- New column for SHA-256 hash time -->
+                <th>Bcrypt Hash Time (ms)</th> <!-- New column for bcrypt hash time -->
             </tr>
         </thead>
         <tbody>
@@ -39,9 +42,12 @@
             <tr>
                 <td>{{ msg.content }}</td>
                 <td>{{ msg.encrypted_content }}</td>
-                <td>{{ msg.encryption_method }}</td> <!-- Existing column for encryption type -->
-                <td>{{ msg.hashed_content_sha256 }}</td> <!-- New column for SHA-256 hash -->
-                <td>{{ msg.hashed_content_bcrypt }}</td> <!-- New column for Bcrypt hash -->
+                <td>{{ msg.encryption_method }}</td>
+                <td>{{ msg.hashed_content_sha256 }}</td>
+                <td>{{ msg.hashed_content_bcrypt }}</td>
+                <td>{{ msg.encryption_time|floatformat:3 }}</td> <!-- Display encryption time in milliseconds -->
+                <td>{{ msg.sha256_hash_time|floatformat:3 }}</td> <!-- Display SHA-256 hash time in milliseconds -->
+                <td>{{ msg.bcrypt_hash_time|floatformat:3 }}</td> <!-- Display bcrypt hash time in milliseconds -->
             </tr>
             {% endfor %}
         </tbody>
