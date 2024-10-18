@@ -47,3 +47,9 @@ def send_message(request):
 def view_messages(request):
     messages = Message.objects.all()  # Retrieve all messages from the database
     return render(request, 'EncryptMsg/view_messages.html', {'messages': messages})
+
+def view_summary_messages(request):
+    # You need to implement logic for summarizing messages
+    # Example: Retrieve the number of messages or some statistics
+    message_count = Message.objects.count()
+    return render(request, 'EncryptMsg/summary_messages.html', {'message_count': message_count})
