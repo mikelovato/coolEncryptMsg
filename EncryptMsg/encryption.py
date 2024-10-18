@@ -142,35 +142,6 @@ def hash_bcrypt(message):
     bcrypt_time = time.perf_counter() - start_time  # Time taken for bcrypt hashing
     return hashed_message, bcrypt_time
 
-def process_message(method, message_content):
-    # Increase message size
-    message_content = message_content * 1000  # Increase the message size 1000 times
-
-    # Perform encryption and measure time
-    encrypted_content, encryption_time = encrypt_message(method, message_content)
-
-    # Perform SHA-256 hashing and measure time
-    hashed_sha256_content, sha256_time = hash_sha256(message_content)
-
-    # Perform SHA-3 hashing and measure time
-    hashed_sha3_content, sha3_time = hash_sha3_256(message_content)
-
-    # Perform Argon2 hashing and measure time
-    hashed_argon2_content, argon2_time = hash_argon2(message_content)
-
-    # Perform Scrypt hashing and measure time
-    hashed_scrypt_content, scrypt_time = hash_scrypt(message_content)
-
-    # Perform bcrypt hashing and measure time
-    hashed_bcrypt_content, bcrypt_time = hash_bcrypt(message_content)
-
-    # Calculate the total time
-    total_time = (
-        encryption_time + sha256_time + 
-        sha3_time + argon2_time + 
-        scrypt_time + bcrypt_time
-    )
-
     # Store in the database (assuming a Django model similar to the one you provided)
     message_instance = Message(
         content=message_content,
