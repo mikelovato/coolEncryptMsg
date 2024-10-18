@@ -20,7 +20,8 @@ RUN apt-get update && apt-get install -y \
     sqlite3 \
     libssl-dev \
     libffi-dev \         # Required for cryptography
-    libsodium-dev && apt-get clean
+    libsodium-dev \
+    && apt-get clean
 
 # Install Python dependencies
 RUN pip3 install --no-cache-dir -r requirements.txt
