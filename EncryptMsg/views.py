@@ -12,10 +12,7 @@ def send_message(request):
             content = form.cleaned_data['content']
             method = form.cleaned_data['encryption_method']
 
-            try:
-                # Increase message size to magnify the time taken for selected encryption and hashing
-                content = content * 1000  # Increase the message size 1000 times
-                
+            try:               
                 # Encrypt the content
                 encrypted_content, encryption_time = encrypt_message(method, content)
 
