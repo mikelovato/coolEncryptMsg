@@ -10,6 +10,7 @@ from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.primitives.ciphers.aead import ChaCha20Poly1305
 from cryptography.hazmat.backends import default_backend
 
+# Example password for key generation
 password = b"passwordexample"
 
 # Function to generate a key using PBKDF2HMAC
@@ -19,6 +20,7 @@ def generate_key(password, salt):
         length=32,  # 32 bytes for AES-256
         salt=salt,
         iterations=480000,
+        backend=default_backend(),
     )
     return kdf.derive(password)
 
