@@ -25,7 +25,7 @@ def generate_key(password, salt):
     return kdf.derive(password)
 
 def encrypt_message(method, message):
-    start_time = time.time()  # Record the start time
+    start_time = time.perf_counter()  # Use high-resolution timer
 
     if method == 'fernet':
         salt = os.urandom(16)
@@ -94,24 +94,24 @@ def encrypt_message(method, message):
     else:
         raise ValueError("Unsupported encryption method")
 
-    encryption_time = time.time() - start_time  # Calculate encryption time
+    encryption_time = time.perf_counter() - start_time  # Calculate encryption time
     return encrypted_result, encryption_time
 
 def hash_sha256(message):
     """Hash a message using SHA-256 and measure the time taken."""
-    start_time = time.time()
+    start_time = time.perf_counter()  # Use high-resolution timer
     sha256 = hashes.Hash(hashes.SHA256(), backend=default_backend())
     sha256.update(message.encode())
     hashed_message = base64.urlsafe_b64encode(sha256.finalize()).decode()
-    sha256_time = time.time() - start_time  # Time taken for SHA-256 hashing
+    sha256_time = time.perf_counter() - start_time  # Time taken for SHA-256 hashing
     return hashed_message, sha256_time
 
 def hash_bcrypt(message):
     """Hash a message using bcrypt and measure the time taken."""
-    start_time = time.time()
+    start_time = time.perf_counter()  # Use high-resolution timer
     salt = bcrypt.gensalt()
     hashed_message = bcrypt.hashpw(message.encode(), salt).decode()
-    bcrypt_time = time.time() - start_time  # Time taken for bcrypt hashing
+    bcrypt_time = time.perf_counter() - start_time  # Time taken for bcrypt hashing
     return hashed_message, bcrypt_time
 
 def process_message(method, message_content):
