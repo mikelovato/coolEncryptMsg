@@ -1,3 +1,5 @@
+import time  # To measure execution time
+from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from .models import Message
 from .forms import MessageForm
