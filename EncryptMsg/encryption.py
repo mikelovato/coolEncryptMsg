@@ -17,7 +17,7 @@ from cryptography.hazmat.primitives import hashes as hash_algorithms
 password = b"passwordexample"
 
 # Function to generate a key using PBKDF2HMAC
-def generate_key(password, salt):
+def generate_key_256(password, salt):
     kdf = PBKDF2HMAC(
         algorithm=hashes.SHA256(),
         length=32,  # 32 bytes for AES-256
@@ -32,7 +32,7 @@ def encrypt_message(method, message):
 
     if method == 'fernet':
         salt = os.urandom(16)
-        key = base64.urlsafe_b64encode(generate_key(password, salt)).decode()
+        key = base64.urlsafe_b64encode(generate_key_256(password, salt)).decode()
         fernet = Fernet(key)
         nonce = os.urandom(16)
         message_with_nonce = nonce + message.encode()
@@ -43,9 +43,9 @@ def encrypt_message(method, message):
             encrypted_message.decode()
         )
     
-    elif method == 'aes_cfb':
+    elif method == 'aes_cfb_256':
         salt = os.urandom(16)
-        key = generate_key(password, salt)
+        key = generate_key_256(password, salt)
         iv = os.urandom(16)
         cipher = Cipher(algorithms.AES(key), modes.CFB(iv), backend=default_backend())
         encryptor = cipher.encryptor()
@@ -67,9 +67,9 @@ def encrypt_message(method, message):
             base64.urlsafe_b64encode(encrypted_message).decode()
         )
     
-    elif method == 'aes_ctr':
+    elif method == 'aes_ctr_256':
         salt = os.urandom(16)
-        key = generate_key(password, salt)
+        key = generate_key_256(password, salt)
         nonce = os.urandom(16)
         cipher = Cipher(algorithms.AES(key), modes.CTR(nonce), backend=default_backend())
         encryptor = cipher.encryptor()
@@ -80,9 +80,9 @@ def encrypt_message(method, message):
             base64.urlsafe_b64encode(encrypted_message).decode()
         )
     
-    elif method == 'aes_gcm':
+    elif method == 'aes_gcm_256':
         salt = os.urandom(16)
-        key = generate_key(password, salt)
+        key = generate_key_256(password, salt)
         nonce = os.urandom(12)
         cipher = Cipher(algorithms.AES(key), modes.GCM(nonce), backend=default_backend())
         encryptor = cipher.encryptor()
