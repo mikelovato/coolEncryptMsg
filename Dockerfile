@@ -20,7 +20,7 @@ RUN apt-get update && apt-get install -y \
     sqlite3 \
     libssl-dev \
     libffi-dev \
-    libsodium-dev \   # Required for cryptography/bcrypt
+    libsodium-dev \  # Required for cryptography/bcrypt
     && apt-get clean
 
 # Install Python dependencies
