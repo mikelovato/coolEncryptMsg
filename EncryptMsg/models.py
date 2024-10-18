@@ -6,9 +6,9 @@ class Message(models.Model):
     encrypted_content = models.TextField()  # Encrypted message content
     hashed_content_sha256 = models.CharField(max_length=64)  # SHA-256 hash (64 characters)
     hashed_content_bcrypt = models.TextField()  # bcrypt hash (variable length)
-    encryption_time = models.DecimalField(max_digits=10, decimal_places=6)  # Time spent on encryption (in seconds with milliseconds precision)
-    sha256_hash_time = models.DecimalField(max_digits=10, decimal_places=6)  # Time spent on SHA-256 hashing (in seconds with milliseconds precision)
-    bcrypt_hash_time = models.DecimalField(max_digits=10, decimal_places=6)  # Time spent on bcrypt hashing (in seconds with milliseconds precision)
+    encryption_time = models.DecimalField(max_digits=10, decimal_places=6)  # Time spent on encryption
+    sha256_hash_time = models.DecimalField(max_digits=10, decimal_places=6)  # Time spent on SHA-256 hashing
+    bcrypt_hash_time = models.DecimalField(max_digits=10, decimal_places=6)  # Time spent on bcrypt hashing
 
     def __str__(self):
         return f"{self.encryption_method} - {self.content[:20]}"
