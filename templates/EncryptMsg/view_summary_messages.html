@@ -31,10 +31,15 @@
                 <th>Ciphertext (Output)</th>
                 <th>Encryption Type</th>
                 <th>SHA-256 Hash</th>
-                <th>Bcrypt Hash</th>
+                <th>SHA-3 Hash</th>                     <!-- New SHA-3 column -->
+                <th>Argon2 Hash</th>                    <!-- New Argon2 column -->
+                <th>Scrypt Hash</th>                    <!-- New Scrypt column -->
+                <th>Bcrypt Hash</th>                    <!-- Existing Bcrypt column -->
                 <th>Encryption Time (ms)</th>
                 <th>SHA-256 Hash Time (ms)</th>
-                <th>Bcrypt Hash Time (ms)</th>
+                <th>Argon2 Hash Time (ms)</th>          <!-- New Argon2 timing column -->
+                <th>Scrypt Hash Time (ms)</th>          <!-- New Scrypt timing column -->
+                <th>Bcrypt Hash Time (ms)</th>          <!-- Existing Bcrypt timing column -->
             </tr>
         </thead>
         <tbody>
@@ -44,9 +49,14 @@
                 <td>{{ msg.encrypted_content }}</td>
                 <td>{{ msg.encryption_method }}</td>
                 <td>{{ msg.hashed_content_sha256 }}</td>
+                <td>{{ msg.hashed_content_sha3 }}</td>  <!-- New SHA-3 hash data -->
+                <td>{{ msg.hashed_content_argon2 }}</td> <!-- New Argon2 hash data -->
+                <td>{{ msg.hashed_content_scrypt }}</td> <!-- New Scrypt hash data -->
                 <td>{{ msg.hashed_content_bcrypt }}</td>
                 <td>{{ msg.encryption_time|floatformat:3 }}</td> <!-- Display encryption time -->
                 <td>{{ msg.sha256_hash_time|floatformat:3 }}</td> <!-- Display SHA-256 hash time -->
+                <td>{{ msg.argon2_hash_time|floatformat:3 }}</td> <!-- New Argon2 hash time -->
+                <td>{{ msg.scrypt_hash_time|floatformat:3 }}</td> <!-- New Scrypt hash time -->
                 <td>{{ msg.bcrypt_hash_time|floatformat:3 }}</td> <!-- Display bcrypt hash time -->
             </tr>
             {% endfor %}
