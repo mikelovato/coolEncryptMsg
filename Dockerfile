@@ -15,14 +15,21 @@ COPY . .
 RUN apt-get update && apt-get install -y \
     python3-pip \
     python3-dev \
-    build-essential \  
+    build-essential \
     git \
     sqlite3 \
-    && apt-get clean \
-    && pip3 install -r requirements.txt \
-    && python3 manage.py migrate
+    libssl-dev \
+    libffi-dev \
+    libsodium-dev \   # Required for cryptography/bcrypt
+    && apt-get clean
 
-# Expose port 8080
+# Install Python dependencies
+RUN pip3 install -r requirements.txt
+
+# Run migrations (important after installing requirements)
+RUN python3 manage.py migrate
+
+# Expose port 8080 for Django development server
 EXPOSE 8080
 
 # Run the Django development server
