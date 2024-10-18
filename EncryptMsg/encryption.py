@@ -1,6 +1,7 @@
 import os
 import base64
-import bcrypt  # Import bcrypt for hashing
+import bcrypt
+import time  # Import the time module to track the time taken
 from django.conf import settings
 from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes
@@ -9,7 +10,6 @@ from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.primitives.ciphers.aead import ChaCha20Poly1305
 from cryptography.hazmat.backends import default_backend
 
-# Define the password that will be used for key derivation
 password = b"passwordexample"
 
 # Function to generate a key using PBKDF2HMAC
@@ -20,101 +20,70 @@ def generate_key(password, salt):
         salt=salt,
         iterations=480000,
     )
-    return kdf.derive(password)  # Return raw key bytes for AES
+    return kdf.derive(password)
 
 def encrypt_message(method, message):
+    start_time = time.time()  # Record the start time
+
     if method == 'fernet':
-        # Generate a random salt for Fernet
-        salt = os.urandom(16)  # Generate a random salt
+        salt = os.urandom(16)
         key = base64.urlsafe_b64encode(generate_key(password, salt)).decode()
         fernet = Fernet(key)
-
-        # Generate a random nonce
-        nonce = os.urandom(16)  # 16 bytes nonce
-        # Prepend nonce to the message
+        nonce = os.urandom(16)
         message_with_nonce = nonce + message.encode()
-        # Encrypt the message
         encrypted_message = fernet.encrypt(message_with_nonce)
-        # Return the nonce, salt, and encrypted message
-        return (
+        encrypted_result = (
             base64.urlsafe_b64encode(nonce).decode() + ':' +
             base64.urlsafe_b64encode(salt).decode() + ':' +
             encrypted_message.decode()
         )
     
     elif method == 'aes_cfb':
-        # AES encryption using CFB mode
-        salt = os.urandom(16)  # Generate a random salt for each encryption
-        key = generate_key(password, salt)  # Generate a key using the random salt
-        iv = os.urandom(16)  # Initialization vector for AES
-        
-        # Encrypt the message using AES in CFB mode
+        salt = os.urandom(16)
+        key = generate_key(password, salt)
+        iv = os.urandom(16)
         cipher = Cipher(algorithms.AES(key), modes.CFB(iv), backend=default_backend())
         encryptor = cipher.encryptor()
         encrypted_message = encryptor.update(message.encode()) + encryptor.finalize()
-        
-        # Return salt, IV, and encrypted message (concatenated with ':')
-        return (
+        encrypted_result = (
             base64.urlsafe_b64encode(salt).decode() + ':' +
             base64.urlsafe_b64encode(iv).decode() + ':' +
             base64.urlsafe_b64encode(encrypted_message).decode()
         )
     
     elif method == 'chacha20_poly1305':
-        # ChaCha20-Poly1305 encryption
-        key = os.urandom(32)  # Generate a random 32-byte key for ChaCha20
-        nonce = os.urandom(12)  # Generate a random 12-byte nonce
+        key = os.urandom(32)
+        nonce = os.urandom(12)
         cipher = ChaCha20Poly1305(key)
-
-        # Encrypt the message
         encrypted_message = cipher.encrypt(nonce, message.encode(), None)
-
-        # Return nonce, key, and encrypted message
-        return (
+        encrypted_result = (
             base64.urlsafe_b64encode(nonce).decode() + ':' +
             base64.urlsafe_b64encode(key).decode() + ':' +
             base64.urlsafe_b64encode(encrypted_message).decode()
         )
     
     elif method == 'aes_ctr':
-        # AES encryption using CTR mode
-        salt = os.urandom(16)  # Generate a random salt for each encryption
-        key = generate_key(password, salt)  # Generate a key using the random salt
-        nonce = os.urandom(16)  # Generate a random 16-byte nonce
-        
-        # Create the cipher method for using AES in CTR mode
+        salt = os.urandom(16)
+        key = generate_key(password, salt)
+        nonce = os.urandom(16)
         cipher = Cipher(algorithms.AES(key), modes.CTR(nonce), backend=default_backend())
         encryptor = cipher.encryptor()
-
-        # Using cipher method to encrypt plaintext
         encrypted_message = encryptor.update(message.encode()) + encryptor.finalize()
-        
-
-        # Return salt, nonce, and encrypted message of using aes CTR mode
-        return (
+        encrypted_result = (
             base64.urlsafe_b64encode(salt).decode() + ':' +
             base64.urlsafe_b64encode(nonce).decode() + ':' +
             base64.urlsafe_b64encode(encrypted_message).decode()
         )
-
+    
     elif method == 'aes_gcm':
-        # AES encryption using GCM mode
-        salt = os.urandom(16)  # Generate a random salt for each encryption
-        key = generate_key(password, salt)  # Generate a key using the random salt
-        nonce = os.urandom(12)  # Generate a random 12-byte nonce
-        
-        # Create the cipher method for using AES in GCM mode
+        salt = os.urandom(16)
+        key = generate_key(password, salt)
+        nonce = os.urandom(12)
         cipher = Cipher(algorithms.AES(key), modes.GCM(nonce), backend=default_backend())
         encryptor = cipher.encryptor()
-
-        # Using cipher method to encrypt plaintext
         encrypted_message = encryptor.update(message.encode()) + encryptor.finalize()
-        
-        # Getting the tag of the GCM mode for authentication and verification
         tag = encryptor.tag
-
-        # Return salt, nonce, tag and encrypted message of using aes GCM mode
-        return (
+        encrypted_result = (
             base64.urlsafe_b64encode(salt).decode() + ':' +
             base64.urlsafe_b64encode(nonce).decode() + ':' +
             base64.urlsafe_b64encode(tag).decode() + ':' +
@@ -123,100 +92,50 @@ def encrypt_message(method, message):
     else:
         raise ValueError("Unsupported encryption method")
 
-def decrypt_message(method, encrypted_message):
-    if method == 'fernet':
-        # Split the nonce, salt, and encrypted message
-        nonce_b64, salt_b64, encrypted_message_b64 = encrypted_message.split(':')
-        nonce = base64.urlsafe_b64decode(nonce_b64)
-        salt = base64.urlsafe_b64decode(salt_b64)
-        encrypted_message_bytes = encrypted_message_b64.encode()
-
-        # Derive the key using the same password and salt
-        key = base64.urlsafe_b64encode(generate_key(password, salt)).decode()
-        fernet = Fernet(key)
-
-        # Decrypt the message
-        decrypted_message_with_nonce = fernet.decrypt(encrypted_message_bytes)
-
-        # Return the decrypted message (removing the nonce)
-        return decrypted_message_with_nonce[16:].decode()  # Remove the nonce
-
-    elif method == 'aes_cfb':
-        # Split the salt, IV, and ciphertext from the encrypted message
-        salt_b64, iv_b64, ciphertext_b64 = encrypted_message.split(':')
-        salt = base64.urlsafe_b64decode(salt_b64)
-        iv = base64.urlsafe_b64decode(iv_b64)
-        ciphertext = base64.urlsafe_b64decode(ciphertext_b64)
-
-        # Generate the key using the same salt
-        key = generate_key(password, salt)
-
-        # Decrypt the message using AES in CFB mode
-        cipher = Cipher(algorithms.AES(key), modes.CFB(iv), backend=default_backend())
-        decryptor = cipher.decryptor()
-        return (decryptor.update(ciphertext) + decryptor.finalize()).decode()
-    
-    elif method == 'chacha20_poly1305':
-        # Split the nonce, key, and ciphertext from the encrypted message
-        nonce_b64, key_b64, ciphertext_b64 = encrypted_message.split(':')
-        nonce = base64.urlsafe_b64decode(nonce_b64)
-        key = base64.urlsafe_b64decode(key_b64)
-        ciphertext = base64.urlsafe_b64decode(ciphertext_b64)
-
-        # Decrypt the message using ChaCha20
-        cipher = ChaCha20Poly1305(key)
-        decrypted_message = cipher.decrypt(nonce, ciphertext, None)
-
-        return decrypted_message.decode()
-
-    elif method == 'aes_ctr':
-        # Split the salt, nonce, and ciphertext from the encrypted message
-        salt_b64, nonce_b64, ciphertext_b64 = encrypted_message.split(':')
-        salt = base64.urlsafe_b64decode(salt_b64)
-        nonce = base64.urlsafe_b64decode(nonce_b64)
-        ciphertext = base64.urlsafe_b64decode(ciphertext_b64)
-
-        # Generate the key using the same salt
-        key = generate_key(password, salt)
-
-        # Generate the decryptor for the message using AES in CTR mode
-        cipher = Cipher(algorithms.AES(key), modes.CTR(nonce), backend=default_backend())
-        decryptor = cipher.decryptor()
-
-        # Decrypt the ciphertext by using decryptor
-        return (decryptor.update(ciphertext) + decryptor.finalize()).decode()
-
-    elif method == 'aes_gcm':
-        # Split the salt, nonce, tag and ciphertext from the encrypted message
-        salt_b64, nonce_b64, tag_b64, ciphertext_b64 = encrypted_message.split(':')
-        salt = base64.urlsafe_b64decode(salt_b64)
-        nonce = base64.urlsafe_b64decode(nonce_b64)
-        tag = base64.urlsafe_b64decode(tag_b64)
-        ciphertext = base64.urlsafe_b64decode(ciphertext_b64)
-
-        # Generate the key using the same salt
-        key = generate_key(password, salt)
-
-        # Generate the decryptor for the message using AES in GCM mode
-        cipher = Cipher(algorithms.AES(key), modes.GCM(nonce, tag), backend=default_backend())
-        decryptor = cipher.decryptor()
-
-        # Decrypt the ciphertext by using decryptor
-        return (decryptor.update(ciphertext) + decryptor.finalize()).decode()
-
-    else:
-        return 'Unsupported encryption method'
+    encryption_time = time.time() - start_time  # Calculate encryption time
+    return encrypted_result, encryption_time
 
 def hash_sha256(message):
-    """Hash a message using SHA-256."""
+    """Hash a message using SHA-256 and measure the time taken."""
+    start_time = time.time()
     sha256 = hashes.Hash(hashes.SHA256(), backend=default_backend())
     sha256.update(message.encode())
-    return base64.urlsafe_b64encode(sha256.finalize()).decode()
+    hashed_message = base64.urlsafe_b64encode(sha256.finalize()).decode()
+    sha256_time = time.time() - start_time  # Time taken for SHA-256 hashing
+    return hashed_message, sha256_time
 
 def hash_bcrypt(message):
-    """Hash a message using bcrypt."""
-    # Generate a salt
+    """Hash a message using bcrypt and measure the time taken."""
+    start_time = time.time()
     salt = bcrypt.gensalt()
-    # Hash the message
-    hashed = bcrypt.hashpw(message.encode(), salt)
-    return hashed.decode()
+    hashed_message = bcrypt.hashpw(message.encode(), salt).decode()
+    bcrypt_time = time.time() - start_time  # Time taken for bcrypt hashing
+    return hashed_message, bcrypt_time
+
+def process_message(method, message_content):
+    # Perform encryption and measure time
+    encrypted_content, encryption_time = encrypt_message(method, message_content)
+
+    # Perform SHA-256 hashing and measure time
+    hashed_sha256_content, sha256_time = hash_sha256(message_content)
+
+    # Perform bcrypt hashing and measure time
+    hashed_bcrypt_content, bcrypt_time = hash_bcrypt(message_content)
+
+    # Calculate the total time
+    total_time = encryption_time + sha256_time + bcrypt_time
+
+    # Store in the database (assuming a Django model similar to the one you provided)
+    message_instance = Message(
+        content=message_content,
+        encryption_method=method,
+        encrypted_content=encrypted_content,
+        hashed_content_sha256=hashed_sha256_content,
+        hashed_content_bcrypt=hashed_bcrypt_content,
+        encryption_time=encryption_time,
+        hash_time=f"{sha256_time:.6f}:{bcrypt_time:.6f}",  # Store hash times in a single field
+        total_time=total_time  # Add the total time
+    )
+    message_instance.save()
+
+    return message_instance
