@@ -115,6 +115,9 @@ def hash_bcrypt(message):
     return hashed_message, bcrypt_time
 
 def process_message(method, message_content):
+    # Increase message size
+    message_content = message_content * 1000  # Increase the message size 1000 times
+
     # Perform encryption and measure time
     encrypted_content, encryption_time = encrypt_message(method, message_content)
 
