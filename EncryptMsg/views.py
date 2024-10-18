@@ -34,7 +34,7 @@ def send_message(request):
                     bcrypt_hash_time=bcrypt_hash_time
                 )
 
-                return redirect('view_messages')
+                return redirect('view_summary_messages')  # Redirect to summary view after successful message
             except Exception as e:
                 # Log the error or handle it as needed
                 print(f"Error occurred: {e}")
@@ -46,11 +46,21 @@ def send_message(request):
 
 def view_messages(request):
     messages = Message.objects.all()  # Retrieve all messages from the database
-    print(f"Retrieved messages: {messages}")  # Debugging output
     return render(request, 'EncryptMsg/view_messages.html', {'messages': messages})
 
 def view_summary_messages(request):
-    # You need to implement logic for summarizing messages
-    # Example: Retrieve the number of messages or some statistics
-    message_count = Message.objects.count()
-    return render(request, 'EncryptMsg/view_summary_messages.html', {'message_count': message_count})
+    messages = Message.objects.all()
+    summary_messages = [
+        {
+            'content': msg.content,                       # The original content (plaintext)
+            'encrypted_content': msg.encrypted_content,   # The encrypted content (ciphertext)
+            'encryption_method': msg.encryption_method,   # The encryption method (e.g., 'fernet', 'aes_cfb')
+            'hashed_content_sha256': msg.hashed_content_sha256,  # SHA-256 hash
+            'hashed_content_bcrypt': msg.hashed_content_bcrypt,   # bcrypt hash
+            'encryption_time': msg.encryption_time,       # Time taken for encryption
+            'sha256_hash_time': msg.sha256_hash_time,     # Time taken for SHA-256 hashing
+            'bcrypt_hash_time': msg.bcrypt_hash_time,      # Time taken for bcrypt hashing
+        }
+        for msg in messages
+    ]
+    return render(request, 'EncryptMsg/view_summary_messages.html', {'messages': summary_messages})
