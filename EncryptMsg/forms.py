@@ -7,5 +7,5 @@ class MessageForm(forms.Form):
         ('chacha20_poly1305', 'ChaCha20-Poly1305'),
         ('aes_cfb_256', 'AES (CFB Mode) - 256 Key size'),
         ('aes_ctr_256', 'AES (CTR Mode) - 256 Key size'),
-        ('aes_gcm_256', 'AES (GCM Mode)  - 256 Key size'),
+        ('aes_gcm_256', 'AES (GCM Mode) - 256 Key size'),
     ])
