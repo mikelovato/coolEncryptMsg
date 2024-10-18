@@ -3,7 +3,14 @@ from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from .forms import MessageForm
 from .models import Message
-from .encryption import encrypt_message, hash_sha256, hash_bcrypt  # Import encryption and hashing functions
+from .encryption import (
+    encrypt_message, 
+    hash_sha256, 
+    hash_bcrypt, 
+    hash_sha3_256,  # Import SHA-3 hashing function
+    hash_argon2,    # Import Argon2 hashing function
+    hash_scrypt      # Import Scrypt hashing function
+)  
 
 def send_message(request):
     if request.method == 'POST':
@@ -19,6 +26,15 @@ def send_message(request):
                 # Hash using SHA-256
                 hashed_content_sha256, sha256_hash_time = hash_sha256(content)
 
+                # Hash using SHA-3
+                hashed_content_sha3, sha3_hash_time = hash_sha3_256(content)
+
+                # Hash using Argon2
+                hashed_content_argon2, argon2_hash_time = hash_argon2(content)
+
+                # Hash using Scrypt
+                hashed_content_scrypt, scrypt_hash_time = hash_scrypt(content)
+
                 # Hash using bcrypt
                 hashed_content_bcrypt, bcrypt_hash_time = hash_bcrypt(content)
 
@@ -28,9 +44,15 @@ def send_message(request):
                     encryption_method=method,
                     encrypted_content=encrypted_content,
                     hashed_content_sha256=hashed_content_sha256,
+                    hashed_content_sha3=hashed_content_sha3,  # Save SHA-3 hash
+                    hashed_content_argon2=hashed_content_argon2,  # Save Argon2 hash
+                    hashed_content_scrypt=hashed_content_scrypt,  # Save Scrypt hash
                     hashed_content_bcrypt=hashed_content_bcrypt,
                     encryption_time=encryption_time,
                     sha256_hash_time=sha256_hash_time,
+                    sha3_hash_time=sha3_hash_time,  # Save time for SHA-3 hash
+                    argon2_hash_time=argon2_hash_time,  # Save time for Argon2 hash
+                    scrypt_hash_time=scrypt_hash_time,  # Save time for Scrypt hash
                     bcrypt_hash_time=bcrypt_hash_time
                 )
 
@@ -56,10 +78,16 @@ def view_summary_messages(request):
             'encrypted_content': msg.encrypted_content,   # The encrypted content (ciphertext)
             'encryption_method': msg.encryption_method,   # The encryption method (e.g., 'fernet', 'aes_cfb')
             'hashed_content_sha256': msg.hashed_content_sha256,  # SHA-256 hash
+            'hashed_content_sha3': msg.hashed_content_sha3,      # SHA-3 hash
+            'hashed_content_argon2': msg.hashed_content_argon2,  # Argon2 hash
+            'hashed_content_scrypt': msg.hashed_content_scrypt,  # Scrypt hash
             'hashed_content_bcrypt': msg.hashed_content_bcrypt,   # bcrypt hash
             'encryption_time': msg.encryption_time,       # Time taken for encryption
             'sha256_hash_time': msg.sha256_hash_time,     # Time taken for SHA-256 hashing
-            'bcrypt_hash_time': msg.bcrypt_hash_time,      # Time taken for bcrypt hashing
+            'sha3_hash_time': msg.sha3_hash_time,         # Time taken for SHA-3 hashing
+            'argon2_hash_time': msg.argon2_hash_time,     # Time taken for Argon2 hashing
+            'scrypt_hash_time': msg.scrypt_hash_time,     # Time taken for Scrypt hashing
+            'bcrypt_hash_time': msg.bcrypt_hash_time,     # Time taken for bcrypt hashing
         }
         for msg in messages
     ]
