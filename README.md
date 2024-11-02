@@ -13,4 +13,4 @@ docker run -d -p 8080:8080 --name cool-msg-container cool-encrypt-msg:1.0
 * [view Plain text to Ciphertext messages](http://127.0.0.1:8080/coolmsg/plaintextsummary/)
 
 ### Example
-![Example](https://github.com/mikelovato/coolEncryptMsg/blob/tree/kinsiong_wip/docs/example.gif)
+![Example](https://github.com/mikelovato/coolEncryptMsg/blob/kinsiong_wip/docs/example.gif)
