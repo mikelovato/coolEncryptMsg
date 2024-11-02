@@ -51,6 +51,17 @@ def EncryptMessage(method, message):
         # Return salt, IV, and encrypted message (concatenated with ':')
         res = 'EmptyTag:' + base64.urlsafe_b64encode(iv).decode() + ':' + base64.urlsafe_b64encode(encrypted_message).decode()
 
+    elif method == 'aes_ecb': # AES encryption using ECB mode
+        # Create the cipher method for using ECB in CTR mode
+        cipher = Cipher(algorithms.AES(key), modes.ECB(), backend=default_backend())
+        encryptor = cipher.encryptor()
+
+        # Using cipher method to encrypt plaintext
+        encrypted_message = encryptor.update(message.encode()) + encryptor.finalize()
+        
+        # Return salt, nonce, and encrypted message of using aes ECB mode
+        res = 'EmptyTag:' + base64.urlsafe_b64encode(iv).decode() + ':' +  base64.urlsafe_b64encode(encrypted_message).decode()
+
     elif method == 'aes_cbc': # AES encryption using CBC mode
         # Create the cipher method for using CBC in CTR mode
         cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
@@ -111,6 +122,14 @@ def DecryptMessage(method, encrypted_message):
         decryptor = cipher.decryptor()
         res = (decryptor.update(ciphertext) + decryptor.finalize()).decode()
 
+    elif method == 'aes_ecb':
+        # Generate the decryptor for the message using AES in ECB mode
+        cipher = Cipher(algorithms.AES(key), modes.ECB(), backend=default_backend())
+        decryptor = cipher.decryptor()
+
+        # Decrypt the ciphertext by using decryptor
+        res = (decryptor.update(ciphertext) + decryptor.finalize()).decode()
+
     elif method == 'aes_cbc':
         # Generate the decryptor for the message using AES in CBC mode
         cipher = Cipher(algorithms.AES(key), modes.CBC(nonce), backend=default_backend())
@@ -155,68 +174,82 @@ def EncryDecryMethWithLength(length):
     random_string = ''.join(random.choice(baseCharacters) for _ in range(length))
 
     cfbEncyLst = []
+    ecbEncyLst = []
     cbcEncyLst = []
     ctrEncyLst = []
     gcmEncyLst = []
 
     cfbEncyTimeLst = []
+    ecbEncyTimeLst = []
     cbcEncyTimeLst = []
     ctrEncyTimeLst = []
     gcmEncyTimeLst = []
 
     cfbDecyLst = []
+    ecbDecyLst = []
     cbcDecyLst = []
     ctrDecyLst = []
     gcmDecyLst = []
 
     cfbDecyTimeLst = []
+    ecbDecyTimeLst = []
     cbcDecyTimeLst = []
     ctrDecyTimeLst = []
     gcmDecyTimeLst = []
 
     for i in range(10):
         cfbEncy, cfbEncyTime = EncryptMessage('aes_cfb', random_string)
+        ecbEncy, ecbEncyTime = EncryptMessage('aes_ecb', random_string)
         cbcEncy, cbcEncyTime = EncryptMessage('aes_cbc', random_string)
         ctrEncy, ctrEncyTime = EncryptMessage('aes_ctr', random_string)
         gcmEncy, gcmEncyTime = EncryptMessage('aes_gcm', random_string)
         cfbEncyLst.append(cfbEncy)
+        ecbEncyLst.append(ecbEncy)
         cbcEncyLst.append(cbcEncy)
         ctrEncyLst.append(ctrEncy)
         gcmEncyLst.append(gcmEncy)
         cfbEncyTimeLst.append(cfbEncyTime)
+        ecbEncyTimeLst.append(ecbEncyTime)
         cbcEncyTimeLst.append(cbcEncyTime)
         ctrEncyTimeLst.append(ctrEncyTime)
         gcmEncyTimeLst.append(gcmEncyTime)
 
     for i in range(10):
         cfbDecy, cfbDecyTime = DecryptMessage('aes_cfb', cfbEncyLst[i])
+        ecbDecy, ecbDecyTime = DecryptMessage('aes_ecb', ecbEncyLst[i])
         cbcDecy, cbcDecyTime = DecryptMessage('aes_cbc', cbcEncyLst[i])
         ctrDecy, ctrDecyTime = DecryptMessage('aes_ctr', ctrEncyLst[i])
         gcmDecy, gcmDecyTime = DecryptMessage('aes_gcm', gcmEncyLst[i])
         cfbDecyLst.append(cfbDecy)
+        ecbDecyLst.append(ecbDecy)
         cbcDecyLst.append(cbcDecy)
         ctrDecyLst.append(ctrDecy)
         gcmDecyLst.append(gcmDecy)
         cfbDecyTimeLst.append(cfbDecyTime)
+        ecbDecyTimeLst.append(ecbDecyTime)
         cbcDecyTimeLst.append(cbcDecyTime)
         ctrDecyTimeLst.append(ctrDecyTime)
         gcmDecyTimeLst.append(gcmDecyTime)
 
     cfbEncyTimeSumTime = 0.0
+    ecbEncyTimeSumTime = 0.0
     cbcEncyTimeSumTime = 0.0
     ctrEncyTimeSumTime = 0.0
     gcmEncyTimeSumTime = 0.0
     cfbDecyTimeSumTime = 0.0
+    ecbDecyTimeSumTime = 0.0
     cbcDecyTimeSumTime = 0.0
     ctrDecyTimeSumTime = 0.0
     gcmDecyTimeSumTime = 0.0
 
     for i in range(10):
         cfbEncyTimeSumTime += cfbEncyTimeLst[i]
+        ecbEncyTimeSumTime += ecbEncyTimeLst[i]
         cbcEncyTimeSumTime += cbcEncyTimeLst[i]
         ctrEncyTimeSumTime += ctrEncyTimeLst[i]
         gcmEncyTimeSumTime += gcmEncyTimeLst[i]
         cfbDecyTimeSumTime += cfbDecyTimeLst[i]
+        ecbDecyTimeSumTime += ecbDecyTimeLst[i]
         cbcDecyTimeSumTime += cbcDecyTimeLst[i]
         ctrDecyTimeSumTime += ctrDecyTimeLst[i]
         gcmDecyTimeSumTime += gcmDecyTimeLst[i]        
@@ -227,6 +260,13 @@ def EncryDecryMethWithLength(length):
     [print("          %0.20f" % (item * 1000)) for item in cfbEncyTimeLst]
     print(" --- cfb : list of decry tiime")
     [print("          %0.20f" % (item * 1000)) for item in cfbDecyTimeLst]
+
+    print(" --- ecb : avg encry time %0.20fms" % (ecbEncyTimeSumTime * 1000 / 10))
+    print(" --- ecb : avg decry time %0.20fms" % (ecbDecyTimeSumTime * 1000 / 10))
+    print(" --- ecb : list of encry tiime")
+    [print("          %0.20f" % (item * 1000)) for item in ecbEncyTimeLst]
+    print(" --- ecb : list of decry tiime")
+    [print("          %0.20f" % (item * 1000)) for item in ecbDecyTimeLst]
 
     print(" --- cbc : avg encry time %0.20fms" % (cbcEncyTimeSumTime * 1000 / 10))
     print(" --- cbc : avg decry time %0.20fms" % (cbcDecyTimeSumTime * 1000 / 10))
